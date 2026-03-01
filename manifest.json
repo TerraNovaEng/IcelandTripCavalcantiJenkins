@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iceland 2026: The $5,500 Mission</title>
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0f172a; color: #f8fafc; text-align: center; padding: 20px; }
+        .container { background: #1e293b; padding: 40px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); max-width: 600px; margin: auto; border: 1px solid #334155; }
+        h1 { color: #38bdf8; margin-bottom: 5px; }
+        #countdown { font-size: 1.2rem; color: #94a3b8; margin-bottom: 30px; font-weight: 300; }
+        .progress-bg { background: #334155; border-radius: 50px; height: 40px; width: 100%; margin: 25px 0; overflow: hidden; position: relative; }
+        .progress-bar { background: linear-gradient(90deg, #0ea5e9, #22c55e); height: 100%; width: 0%; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .progress-text { position: absolute; width: 100%; top: 50%; left: 0; transform: translateY(-50%); font-weight: bold; font-size: 0.9rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .total { font-size: 3rem; font-weight: 800; margin: 10px 0; color: #f1f5f9; }
+        .goal-text { color: #64748b; font-size: 1.1rem; margin-bottom: 30px; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        button { background: #334155; color: white; border: 1px solid #475569; padding: 15px; border-radius: 12px; cursor: pointer; font-size: 1rem; transition: all 0.2s; }
+        button:hover { background: #475569; transform: translateY(-2px); }
+        .btn-add { border-color: #22c55e; color: #4ade80; }
+        
+        /* New Styles for Correction Buttons */
+        .management-zone { margin-top: 30px; padding-top: 20px; border-top: 1px dashed #334155; display: flex; justify-content: space-between; align-items: center; }
+        .btn-remove { background: transparent; color: #94a3b8; border: 1px solid #334155; padding: 8px 15px; font-size: 0.8rem; border-radius: 8px; }
+        .btn-remove:hover { color: #f8fafc; border-color: #64748b; }
+        .btn-reset { background: transparent; color: #ef4444; border: 1px solid #7f1d1d; font-size: 0.8rem; padding: 8px 15px; border-radius: 8px; }
+        .btn-reset:hover { background: #450a0a; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🇮🇸 Iceland 2026</h1>
+    <div id="countdown">Loading countdown...</div>
+    
+    <div class="total">$<span id="balance">0</span></div>
+    <div class="goal-text">Saved of our $5,500 Goal</div>
+
+    <div class="progress-bg">
+        <div id="progress" class="progress-bar"></div>
+        <div id="prog-percent" class="progress-text">0% Complete</div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-add" onclick="addMoney(15, 'Takeout')">🚫 Takeout (+$15)</button>
+        <button class="btn-add" onclick="addMoney(5, 'Coffee')">☕ Coffee (+$5)</button>
+        <button class="btn-add" onclick="addMoney(50, 'Superfluous')">📦 Superfluous (+$50)</button>
+        <button class="btn-add" onclick="addMoney(10, 'Home Meal')">🏠 Home Meal (+$10)</button>
+    </div>
+    
+    <div class="management-zone">
+        <button class="btn-remove" onclick="removeAmount()">➖ Remove Amount</button>
+        <button class="btn-reset" onclick="resetBalance()">Reset Progress</button>
+    </div>
+</div>
+
+<script>
+    const goal = 5500;
+    // Load existing balance or start at 0
+    let balance = localStorage.getItem('icelandBalance') ? parseFloat(localStorage.getItem('icelandBalance')) : 0;
+
+    function updateCountdown() {
+        const tripDate = new Date("December 23, 2026 00:00:00").getTime();
+        const now = new Date().getTime();
+        const diff = tripDate - now;
+
+        if (diff <= 0) {
+            document.getElementById('countdown').innerText = "Enjoy your trip! ✈️❄️";
+            return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        
+        document.getElementById('countdown').innerText = `${days} days, ${hours} hours until liftoff 🛫`;
+    }
+
+    function updateUI() {
+        document.getElementById('balance').innerText = balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        let percentage = (balance / goal) * 100;
+        document.getElementById('progress').style.width = Math.min(percentage, 100) + "%";
+        document.getElementById('prog-percent').innerText = Math.round(percentage) + "% Complete";
+    }
+
+    function addMoney(amount, source) {
+        balance += amount;
+        localStorage.setItem('icelandBalance', balance);
+        updateUI();
+        
+        // The Reminder Popup
+        setTimeout(() => {
+            alert(`Great job! You saved $${amount} from ${source}.\n\n⚠️ ACTION REQUIRED: Don't forget to actually transfer $${amount} to your real savings account now!`);
+        }, 300);
+    }
+
+    function removeAmount() {
+        let input = prompt("How much would you like to remove from the jar?");
+        let amount = parseFloat(input);
+
+        if (isNaN(amount) || amount <= 0) {
+            alert("Please enter a valid number greater than 0.");
+        } else if (amount > balance) {
+            alert("You can't remove more than what is in the jar!");
+        } else {
+            balance -= amount;
+            localStorage.setItem('icelandBalance', balance);
+            updateUI();
+            alert(`Success: $${amount.toFixed(2)} removed.`);
+        }
+    }
+
+    function resetBalance() {
+        if(confirm("Are you sure you want to reset? This will wipe your progress to $0.")) {
+            if(confirm("Last chance! This cannot be undone. Reset anyway?")) {
+                balance = 0;
+                localStorage.setItem('icelandBalance', balance);
+                updateUI();
+            }
+        }
+    }
+
+    // Initialize
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+    updateUI();
+</script>
+
+</body>
+</html>
